@@ -46,8 +46,8 @@ else
     MouseMove, 382, 66
     MouseClick,
 
-    Sleep, 1000
-    Send, {tab}
+   ;;;; Sleep, 5000
+   ;;;; Send, {tab}
     Sleep, 500
     Send %inputADUsername%
     Send, {enter}
