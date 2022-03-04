@@ -8,7 +8,8 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 ;           TODO:
 ; - Adjust window titles and design/size.
 ; - Error checking for InputBox.
-; - 
+; - Clean code by adding methods.
+; - Loops for closing AD windows.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; START SCRIPT WHEN Window Key and Numpad 1 ARE PRESSED.
@@ -16,43 +17,36 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
 ; Close AD Window(s).
 WinClose, Active Directory Users and Computers, , , ,
-
+WinClose, ahk_exe mmc.exe
 
 ; Display InputBox that requires user input and display the message below.
 InputBox, inputADUsername, Reset Domain User's Password, Please enter a Username that you want to change the password of:, , 300, 150, , , , ,
-
-; Check if there was error.
 if (ErrorLevel)
+
 {
-    MsgBox, CANCEL was pressed.
+    MsgBox, CANCEL was pressed.`nClosing system.
     return
 }
 else
 {
-    ; Display message to confirm the name entered.
-    ;;; MsgBox, You entered "%inputADUsername%". We will now open that user in AD.
-
    ; Launch AD and wait until that window is active.
     Run "dsa.msc"
     WinWait, Active Directory Users and Computers
 
-    Sleep, 1500
-
-    ; Move mouse to click on domain.
+    ; Move mouse to click on DOMAIN.
     MouseMove, 40, 130
     MouseClick,
 
     ; Move mouse to FIND button and navigate to input ADUser's Name.
     MouseMove, 382, 66
     MouseClick,
-
-   ;;;; Sleep, 5000
-   ;;;; Send, {tab}
     Sleep, 500
     Send %inputADUsername%
     Send, {enter}
-    Sleep, 1000
+
+    ; Move mouse to SEARCHED USER.
     MouseMove, 20, 348
+    Sleep, 500
     MouseClick
 
     ; Ask user if this is the correct ADUser to edit.
@@ -60,32 +54,35 @@ else
 
     If (isCorrectADUser == "y" or isCorrectADUser == "Y")
     {
-        MsgBox, ,, COOL BEANS! YOU SELECTED %isCorrectADUser%. WE WILL CONTINUE!, 2
-
         ; Display InputBox that requres user input asking for new password.
         InputBox, inputADPassword, ENTER NEW PASSWORD, What is the new password you would like to set for the user?, HIDE, 300, 150, , , , ,
 
+        ; Rightclick and move mouse to CHANGE PASSWORD.
         Sleep, 500
-
         MouseClick, Right, , , , , ,
         MouseMove, 36, 484
         MouseClick,
-
+        
+        ; Enter the new password.
         Send, %inputADPassword%
         Send, {tab}
         Send, %inputADPassword%
 
-       ;;; Send, {enter}
+        ;;; Send, {enter}
 
-       ;MsgBox, , SUCCESS!, The pasword for User: %inputADUsername% has been reset to %inputADPassword%!!!,\
 
-       WinClose, 
+        ;;;;WinClose, ahk_exe mmc.exe
+        ;;;;WinClose, ahk_exe mmc.exe
+
+        ;;;MsgBox, , SUCCESS!, The pasword for User: %inputADUsername% has been reset!
         return
     }
     else
-
     {
         MsgBox, YOU SELECTED NO OR SOME OTHER OPTION. STOPPING NOW!!!!            
+        MsgBox, CLOSING AD...
+        WinClose, ahk_exe mmc.exe
+        WinClose, ahk_exe mmc.exe
         return
     }
 }
