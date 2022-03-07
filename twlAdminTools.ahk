@@ -6,25 +6,23 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;           TODO:
+; - Run script as Admin.
+; - Check if user has Admin rights.
 ; - Adjust window titles and design/size.
-; - Error checking for InputBox.
-; - Clean code by adding methods.
-; - Loops for closing AD windows.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;; METHODS ;;;;
 CloseAllADWindows(){
     While, WinExist("ahk_exe mmc.exe"){
         WinClose, ahk_exe mmc.exe
-        Sleep 500
     }
     ; Ctrl+Win+F4 to close desktop.
-        SendInput ^#{F4}
+    SendInput ^#{F4}
 }
 
 CreateNewDesktop(){
     SendInput #^{d}
-    sleep 250
+    sleep 100
 }
 
 ; START SCRIPT WHEN Window Key and Numpad 1 ARE PRESSED.
@@ -73,7 +71,7 @@ else{
 
         ; Rightclick and move mouse to CHANGE PASSWORD.
         Sleep, 500
-        MouseClick, Right, , , , , ,
+        MouseClick, Right
         MouseMove, 36, 484
         MouseClick,
         
@@ -81,11 +79,11 @@ else{
         Send, %inputADPassword%
         Send, {tab}
         Send, %inputADPassword%
-
-        ;;; Send, {enter}
-        ;;;MsgBox, , SUCCESS!, The pasword for User: %inputADUsername% has been reset!
-        ;;;InputBox, isComplete, THIS IS THE END!, The script has ended. Please press ENTER to complete the last step., , 300, 150, , , , ,
-        ;;;CloseAllADWindows()
+        sleep 150
+        Send, {enter}
+        sleep 300
+        MsgBox, , SUCCESS!, The pasword for User: %inputADUsername% has been reset!`nNow closing all open AD Windows.
+        CloseAllADWindows()
         return
     }
     else{
