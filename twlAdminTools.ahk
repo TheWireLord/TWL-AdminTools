@@ -15,6 +15,9 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 ; START SCRIPT WHEN Window Key and Numpad 1 ARE PRESSED.
 #Numpad1::
 
+; Create new desktop.
+SendInput #^{d}
+
 ; Close AD Window(s).
 WinClose, Active Directory Users and Computers, , , ,
 WinClose, ahk_exe mmc.exe
@@ -22,7 +25,6 @@ WinClose, ahk_exe mmc.exe
 ; Display InputBox that requires user input and display the message below.
 InputBox, inputADUsername, Reset Domain User's Password, Please enter a Username that you want to change the password of:, , 300, 150, , , , ,
 if (ErrorLevel)
-
 {
     MsgBox, CANCEL was pressed.`nClosing system.
     return
