@@ -1,7 +1,7 @@
-﻿#NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
+#NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
 #Warn  ; Enable warnings to assist with detecting common errors.
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
-CoordMode, Mouse, Relative ; THIS SETS THE "MouseMove" SET RELATIVE TO THE ACTIVE WINDOW.
+CoordMode, Mouse, Relative ; THIS SETS THE "MouseMove" RELATIVE TO THE ACTIVE WINDOW.
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -12,26 +12,39 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 ; - Loops for closing AD windows.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;;;; METHODS ;;;;
+CloseAllADWindows(){
+    While, WinExist("ahk_exe mmc.exe"){
+        WinClose, ahk_exe mmc.exe
+        Sleep 500
+    }
+    ; Ctrl+Win+F4 to close desktop.
+        SendInput ^#{F4}
+}
+
+CreateNewDesktop(){
+    SendInput #^{d}
+    sleep 250
+}
+
 ; START SCRIPT WHEN Window Key and Numpad 1 ARE PRESSED.
 #Numpad1::
 
-; Create new desktop.
-SendInput #^{d}
+; Close all open AD Windows.
+CloseAllADWindows()
 
-; Close AD Window(s).
-WinClose, Active Directory Users and Computers, , , ,
-WinClose, ahk_exe mmc.exe
+; Create new desktop.
+CreateNewDesktop()
 
 ; Display InputBox that requires user input and display the message below.
 InputBox, inputADUsername, Reset Domain User's Password, Please enter a Username that you want to change the password of:, , 300, 150, , , , ,
-if (ErrorLevel)
-{
+if (ErrorLevel){
     MsgBox, CANCEL was pressed.`nClosing system.
+    CloseAllADWindows()
     return
 }
-else
-{
-   ; Launch AD and wait until that window is active.
+else{
+    ; Launch AD and wait until that window is active.
     Run "dsa.msc"
     WinWait, Active Directory Users and Computers
 
@@ -54,8 +67,7 @@ else
     ; Ask user if this is the correct ADUser to edit.
     InputBox, isCorrectADUser , IS THE USER CORRECT?, Is this the correct user you wish to edit? (Y or N), , 200, 200, , , , , 
 
-    If (isCorrectADUser == "y" or isCorrectADUser == "Y")
-    {
+    if (isCorrectADUser == "y" or isCorrectADUser == "Y"){
         ; Display InputBox that requres user input asking for new password.
         InputBox, inputADPassword, ENTER NEW PASSWORD, What is the new password you would like to set for the user?, HIDE, 300, 150, , , , ,
 
@@ -71,20 +83,15 @@ else
         Send, %inputADPassword%
 
         ;;; Send, {enter}
-
-
-        ;;;;WinClose, ahk_exe mmc.exe
-        ;;;;WinClose, ahk_exe mmc.exe
-
         ;;;MsgBox, , SUCCESS!, The pasword for User: %inputADUsername% has been reset!
+        ;;;InputBox, isComplete, THIS IS THE END!, The script has ended. Please press ENTER to complete the last step., , 300, 150, , , , ,
+        ;;;CloseAllADWindows()
         return
     }
-    else
-    {
-        MsgBox, YOU SELECTED NO OR SOME OTHER OPTION. STOPPING NOW!!!!            
-        MsgBox, CLOSING AD...
-        WinClose, ahk_exe mmc.exe
-        WinClose, ahk_exe mmc.exe
+    else{
+        MsgBox, YOU SELECTED NO OR SOME OTHER OPTION. STOPPING NOW!!!!`nCLOSING AD...
+
+        CloseAllADWindows()
         return
     }
 }
