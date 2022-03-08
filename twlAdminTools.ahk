@@ -1,15 +1,10 @@
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
 #Warn  ; Enable warnings to assist with detecting common errors.
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
-CoordMode, Mouse, Relative ; THIS SETS THE "MouseMove" RELATIVE TO THE ACTIVE WINDOW.
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
+CoordMode, Mouse, Relative ; THIS SETS THE "MouseMove" RELATIVE TO THE ACTIVE WINDOW.
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;           TODO:
-; - Run script as Admin.
-; - Check if user has Admin rights.
-; - Adjust window titles and design/size.
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ;
 
 ;;;; METHODS ;;;;
 CloseAllADWindows(){
@@ -20,7 +15,7 @@ CloseAllADWindows(){
     SendInput ^#{F4}
 }
 
-CreateNewDesktop(){
+CreateNewDesktop(){     ; TODO: #5 Check if currenly in new desktop.
     SendInput #^{d}
     sleep 100
 }
@@ -55,36 +50,53 @@ else{
     MouseClick,
     Sleep, 500
     Send %inputADUsername%
+    Sleep 100
     Send, {enter}
 
     ; Move mouse to SEARCHED USER.
     MouseMove, 20, 348
-    Sleep, 500
+    Sleep, 150
     MouseClick
 
     ; Ask user if this is the correct ADUser to edit.
     InputBox, isCorrectADUser , IS THE USER CORRECT?, Is this the correct user you wish to edit? (Y or N), , 200, 200, , , , , 
 
-    if (isCorrectADUser == "y" or isCorrectADUser == "Y"){
+    if (isCorrectADUser == "y" or "Y" or ""){
         ; Display InputBox that requres user input asking for new password.
-        InputBox, inputADPassword, ENTER NEW PASSWORD, What is the new password you would like to set for the user?, HIDE, 300, 150, , , , ,
+        InputBox, inputADPassword, ENTER NEW PASSWORD, What is the new password you would like to set for the user?, , 300, 150, , , , ,
+        if (ErrorLevel){    ; TODO: #4 Get rid of nested IfEsle
+            MsgBox, CANCEL was pressed.`nClosing system.
+            CloseAllADWindows()
+            return
+        }
+        else{
+            ; Rightclick and move mouse to CHANGE PASSWORD.
+            Sleep, 500
+            MouseClick, Right
+            MouseMove, 36, 484
+            MouseClick,
+            Sleep 150
+            
+            ; Enter the new password.
+            Send, %inputADPassword%
+            Sleep, 150
+            Send, {tab}
+            Sleep, 150
+            Send, %inputADPassword%
+            sleep 150
+            Send, {enter}
+            sleep 300
 
-        ; Rightclick and move mouse to CHANGE PASSWORD.
-        Sleep, 500
-        MouseClick, Right
-        MouseMove, 36, 484
-        MouseClick,
-        
-        ; Enter the new password.
-        Send, %inputADPassword%
-        Send, {tab}
-        Send, %inputADPassword%
-        sleep 150
-        Send, {enter}
-        sleep 300
-        MsgBox, , SUCCESS!, The pasword for User: %inputADUsername% has been reset!`nNow closing all open AD Windows.
-        CloseAllADWindows()
-        return
+            ; Copy inputADPassword to Clipboard.
+            Clipboard = %inputADPassword%
+
+            ; TODO: #3 Check for if password set was a success.
+
+            ; Display MsgBox confirming password change.
+            MsgBox, , SUCCESS!, The pasword for User: %inputADUsername% has been reset!`nNow closing all open AD Windows.`n`PASSWORD RESET TO %inputADPassword%.`nTHE PASSWORD HAS BEEN COPPIED TO YOUR CLIPBOARD.
+            CloseAllADWindows()
+            return
+        }        
     }
     else{
         MsgBox, YOU SELECTED NO OR SOME OTHER OPTION. STOPPING NOW!!!!`nCLOSING AD...
