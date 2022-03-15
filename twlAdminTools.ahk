@@ -16,11 +16,11 @@ CloseAllADWindows(){
 }
 
 CreateNewDesktop(){     ; TODO: #5 Check if currenly in new desktop.
-    SendInput #^{d}
-    sleep 100
+    SendInput ^#{d}
+    Sleep, 100
 }
 
-; START SCRIPT WHEN Window Key and Numpad 1 ARE PRESSED.
+; Start script when WindowsKey and NumPad1 are pressed.
 #Numpad1::
 
 ; Close all open AD Windows.
@@ -45,12 +45,16 @@ else{
     MouseMove, 40, 130
     MouseClick,
 
-    ; Move mouse to FIND button and navigate to input ADUser's Name.
+    ; Move mouse to FIND button.
     MouseMove, 382, 66
     MouseClick,
     Sleep, 500
+    
+    ; Move mouse to click on name field and input ADUsers Name.
+    MouseMove, 119, 135
+    MouseClick,
     Send %inputADUsername%
-    Sleep 100
+    Sleep, 100
     Send, {enter}
 
     ; Move mouse to SEARCHED USER.
@@ -75,7 +79,7 @@ else{
             MouseClick, Right
             MouseMove, 36, 484
             MouseClick,
-            Sleep 150
+            Sleep, 150
             
             ; Enter the new password.
             Send, %inputADPassword%
@@ -83,9 +87,9 @@ else{
             Send, {tab}
             Sleep, 150
             Send, %inputADPassword%
-            sleep 150
+            Sleep, 150
             Send, {enter}
-            sleep 300
+            Sleep, 300
 
             ; Copy inputADPassword to Clipboard.
             Clipboard = %inputADPassword%
