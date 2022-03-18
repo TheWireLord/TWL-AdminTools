@@ -38,7 +38,9 @@ if (ErrorLevel){
 }
 else{
     ; Launch AD and wait until that window is active.
-    Run "dsa.msc"
+    Run "dsa.msc"       ; TODO: #7 Check if Active Directory is already running.
+                        ; TODO: #8 Check if Active Directory was started successfully.
+                        
     WinWait, Active Directory Users and Computers
 
     ; Move mouse to click on DOMAIN.
