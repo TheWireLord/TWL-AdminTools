@@ -2,6 +2,36 @@
 # It generates a random password, resets the selected user's password, unlocks the account, and copies the new password to the clipboard. 
 # It repeats until the user chooses to stop.
 
+# Define the log directory and file path
+$logDir = "logs"
+$logFile = "$logDir/log-ADPassReset.txt"
+
+# Check if the log directory exists, if not, create it
+if (!(Test-Path $logDir)) {
+    New-Item -ItemType Directory -Force -Path $logDir
+}
+
+# Add a log entry for the start of the script
+Add-Content -Path $logFile -Value ("[AD]-STARTED: " + (Get-Date -Format "MM/dd/yyyy hh:mm:ss tt"))
+
+function Show-TitleScreen {
+    $title = @"
+    _______  _     _  ___                 _______  ______              _______  _______  _______  _______    ______    _______  _______  _______  _______ 
+   |       || | _ | ||   |               |   _   ||      |            |       ||   _   ||       ||       |  |    _ |  |       ||       ||       ||       |
+   |_     _|| || || ||   |       ____    |  |_|  ||  _    |   ____    |    _  ||  |_|  ||  _____||  _____|  |   | ||  |    ___||  _____||    ___||_     _|
+     |   |  |       ||   |      |____|   |       || | |   |  |____|   |   |_| ||       || |_____ | |_____   |   |_||_ |   |___ | |_____ |   |___   |   |  
+     |   |  |       ||   |___            |       || |_|   |           |    ___||       ||_____  ||_____  |  |    __  ||    ___||_____  ||    ___|  |   |  
+     |   |  |   _   ||       |           |   _   ||       |           |   |    |   _   | _____| | _____| |  |   |  | ||   |___  _____| ||   |___   |   |  
+     |___|  |__| |__||_______|           |__| |__||______|            |___|    |__| |__||_______||_______|  |___|  |_||_______||_______||_______|  |___|  
+   
+"@
+    Write-Host $title
+}
+
+# Show the title screen
+Show-TitleScreen
+
+
 # Import ActiveDirectory module
 Import-module ActiveDirectory
 
@@ -57,6 +87,9 @@ while ($true) {
     $selectedUser | Set-ADAccountPassword -Reset -NewPassword (ConvertTo-SecureString -AsPlainText $password -Force)
     $selectedUser | Unlock-ADAccount
 
+    # Add a log entry for the password reset
+    Add-Content -Path $logFile -Value ("USER: $($selectedUser.Username) Reset At: " + (Get-Date -Format "MM/dd/yyyy hh:mm:ss tt"))
+
     # Copy the password to the clipboard
     $password | Set-Clipboard
 
@@ -65,7 +98,8 @@ while ($true) {
     # Ask the user if they want to continue
     $continue = Read-Host "Do you want to change another password? (y/n)"
     if ($continue -ne "y") {
-        Write-Host "The program has ended. Press escape to close the program."
         break
     }
 }
+
+Add-Content -Path $logFile -Value ("END: " + (Get-Date -Format "MM/dd/yyyy hh:mm:ss tt"))

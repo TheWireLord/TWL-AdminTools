@@ -1,8 +1,38 @@
-# Define the log file path
-$logFile = "log-GmailPassReset.txt"
+# Short descrition of this program and what id does:
+# This script is used to reset the password for a Gmail user using GAM (Google Apps Manager) command-line tool.
+# It prompts the user to enter the first name, last name, or username of the user to reset the password for.
+# It then displays a table of matching users and allows the user to select a user to reset the password for.
+# The script generates a random password, resets the user's password using GAM, and copies the new password to the clipboard.
+# It also logs the password reset action in a log file and allows the user to reset another password if desired.
+
+# Define the log directory and file path
+$logDir = "logs"
+$logFile = "$logDir/log-GmailPassReset.txt"
+
+# Check if the log directory exists, if not, create it
+if (!(Test-Path $logDir)) {
+    New-Item -ItemType Directory -Force -Path $logDir
+}
 
 # Add a log entry for the start of the script
-Add-Content -Path $logFile -Value ("STARTED: " + (Get-Date -Format "MM/dd/yyyy hh:mm:ss tt"))
+Add-Content -Path $logFile -Value ("[GMAIL]-STARTED: " + (Get-Date -Format "MM/dd/yyyy hh:mm:ss tt"))
+
+function Show-TitleScreen {
+    $title = @"
+    _______  _     _  ___                 _______  __   __  _______  ___   ___                 _______  _______  _______  _______    ______    _______  _______  _______  _______ 
+   |       || | _ | ||   |               |       ||  |_|  ||   _   ||   | |   |               |       ||   _   ||       ||       |  |    _ |  |       ||       ||       ||       |
+   |_     _|| || || ||   |       ____    |    ___||       ||  |_|  ||   | |   |       ____    |    _  ||  |_|  ||  _____||  _____|  |   | ||  |    ___||  _____||    ___||_     _|
+     |   |  |       ||   |      |____|   |   | __ |       ||       ||   | |   |      |____|   |   |_| ||       || |_____ | |_____   |   |_||_ |   |___ | |_____ |   |___   |   |  
+     |   |  |       ||   |___            |   ||  ||       ||       ||   | |   |___            |    ___||       ||_____  ||_____  |  |    __  ||    ___||_____  ||    ___|  |   |  
+     |   |  |   _   ||       |           |   |_| || ||_|| ||   _   ||   | |       |           |   |    |   _   | _____| | _____| |  |   |  | ||   |___  _____| ||   |___   |   |  
+     |___|  |__| |__||_______|           |_______||_|   |_||__| |__||___| |_______|           |___|    |__| |__||_______||_______|  |___|  |_||_______||_______||_______|  |___|  
+   
+"@
+    Write-Host $title
+}
+
+# Show the title screen
+Show-TitleScreen
 
 function Get-UsersTable {
     param(
@@ -100,11 +130,27 @@ if ($choice -match '^\d+$' -and $choice -le $usersTable.Count) {
 
     # Output the new password
     Write-Host "The password for user $($selectedUser.Username) has been reset and copied to the clipboard."
+    
+    # Ask the user if they want to reset another password
+    $resetAnother = Read-Host "Do you want to reset another password? (Y/N)"
+    if ($resetAnother -eq 'Y') {
+        # Restart the script
+        & $PSScriptRoot\twlGooglePassReset.ps1
+    }
+
 } else {
     Write-Host "Invalid input. Please run the script again..."
-    # Loop back to the beginning of the script
-    # Looping this way will log the start time again.
-    .\twlGooglePassReset.ps1
+
+    # Ask the user if they want to run the script again
+    $runAgain = Read-Host "Do you want to run the script again? (Y/N)"
+    if ($runAgain -eq 'Y') {
+        # Restart the script
+        & $PSScriptRoot\twlGooglePassReset.ps1
+    }
+    else {
+        #Close the script
+        exit
+    }
 }
 
 # Add a log entry for the end of the script
