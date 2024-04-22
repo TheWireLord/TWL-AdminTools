@@ -1,3 +1,9 @@
+# Define the log file path
+$logFile = "log-GmailPassReset.txt"
+
+# Add a log entry for the start of the script
+Add-Content -Path $logFile -Value ("STARTED: " + (Get-Date -Format "MM/dd/yyyy hh:mm:ss tt"))
+
 function Get-UsersTable {
     param(
         [Parameter(Mandatory=$true)]
@@ -86,11 +92,20 @@ if ($choice -match '^\d+$' -and $choice -le $usersTable.Count) {
     # Reset the user's password using GAM
     & gam update user $selectedUser.Username password $randomPassword changepassword on
 
+    # Add a log entry for the password reset
+    Add-Content -Path $logFile -Value ("USER: $($selectedUser.Username) Reset At: " + (Get-Date -Format "MM/dd/yyyy hh:mm:ss tt"))
+
     # Copy the password to the clipboard
     $randomPassword | Set-Clipboard
 
     # Output the new password
     Write-Host "The password for user $($selectedUser.Username) has been reset and copied to the clipboard."
 } else {
-    Write-Host "Invalid input. Please run the script again and select a valid user or enter 'info'."
+    Write-Host "Invalid input. Please run the script again..."
+    # Loop back to the beginning of the script
+    # Looping this way will log the start time again.
+    .\twlGooglePassReset.ps1
 }
+
+# Add a log entry for the end of the script
+Add-Content -Path $logFile -Value ("END: " + (Get-Date -Format "MM/dd/yyyy hh:mm:ss tt"))
