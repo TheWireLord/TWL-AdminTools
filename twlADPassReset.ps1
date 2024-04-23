@@ -16,13 +16,20 @@ Add-Content -Path $logFile -Value ("[AD]-STARTED: " + (Get-Date -Format "MM/dd/y
 
 function Show-TitleScreen {
     $title = @"
-    _______  _     _  ___                 _______  ______              _______  _______  _______  _______    ______    _______  _______  _______  _______ 
-   |       || | _ | ||   |               |   _   ||      |            |       ||   _   ||       ||       |  |    _ |  |       ||       ||       ||       |
-   |_     _|| || || ||   |       ____    |  |_|  ||  _    |   ____    |    _  ||  |_|  ||  _____||  _____|  |   | ||  |    ___||  _____||    ___||_     _|
-     |   |  |       ||   |      |____|   |       || | |   |  |____|   |   |_| ||       || |_____ | |_____   |   |_||_ |   |___ | |_____ |   |___   |   |  
-     |   |  |       ||   |___            |       || |_|   |           |    ___||       ||_____  ||_____  |  |    __  ||    ___||_____  ||    ___|  |   |  
-     |   |  |   _   ||       |           |   _   ||       |           |   |    |   _   | _____| | _____| |  |   |  | ||   |___  _____| ||   |___   |   |  
-     |___|  |__| |__||_______|           |__| |__||______|            |___|    |__| |__||_______||_______|  |___|  |_||_______||_______||_______|  |___|  
+    TWL - AD - PASS
+          **    *  
+      * *    * *   
+    **           **
+          *     *  
+                 **
+    * *            
+           *       
+                   
+     *             
+               *   
+                   
+                   
+    
    
 "@
     Write-Host $title
@@ -30,7 +37,6 @@ function Show-TitleScreen {
 
 # Show the title screen
 Show-TitleScreen
-
 
 # Import ActiveDirectory module
 Import-module ActiveDirectory
@@ -50,20 +56,22 @@ while ($true) {
 
     # Display the found users with their information
     Write-Host "Found users:"
+    $counter = 0
     $users | ForEach-Object {
-    $lockedOut = if ($_.LockedOut) { "LOCKED" } else { "NOT" }
-    $lastLogon = if ($_.LastLogonDate) { $_.LastLogonDate.ToString() } else { "Never logged in" }
-    $created = if ($_.whenCreated) { $_.whenCreated.ToString() } else { "N/A" }
-    [PSCustomObject]@{
-        'Number' = $users.IndexOf($_) + 1
-        'SamAccountName' = $_.SamAccountName
-        'Name' = $_.Name
-        'Email' = $_.EmailAddress
-        'Locked?' = $lockedOut
-        'Created On' = $created
-        'Last Logon' = $lastLogon
-    }
-} | Format-Table -AutoSize
+        $lockedOut = if ($_.LockedOut) { "LOCKED" } else { "NOT" }
+        $lastLogon = if ($_.LastLogonDate) { $_.LastLogonDate.ToString() } else { "Never logged in" }
+        $created = if ($_.whenCreated) { $_.whenCreated.ToString() } else { "N/A" }
+        [PSCustomObject]@{
+            'Number' = $counter + 1
+            'SamAccountName' = $_.SamAccountName
+            'Name' = $_.Name
+            'Email' = $_.EmailAddress
+            'Locked?' = $lockedOut
+            'Created On' = $created
+            'Last Logon' = $lastLogon
+        }
+        $counter++
+    } | Format-Table -AutoSize
 
     # Ask the user to select a user by entering the corresponding number
     $userNumber = Read-Host "Enter the number of the user you want to change the password for"

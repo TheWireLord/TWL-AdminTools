@@ -19,14 +19,20 @@ Add-Content -Path $logFile -Value ("[GMAIL]-STARTED: " + (Get-Date -Format "MM/d
 
 function Show-TitleScreen {
     $title = @"
-    _______  _     _  ___                 _______  __   __  _______  ___   ___                 _______  _______  _______  _______    ______    _______  _______  _______  _______ 
-   |       || | _ | ||   |               |       ||  |_|  ||   _   ||   | |   |               |       ||   _   ||       ||       |  |    _ |  |       ||       ||       ||       |
-   |_     _|| || || ||   |       ____    |    ___||       ||  |_|  ||   | |   |       ____    |    _  ||  |_|  ||  _____||  _____|  |   | ||  |    ___||  _____||    ___||_     _|
-     |   |  |       ||   |      |____|   |   | __ |       ||       ||   | |   |      |____|   |   |_| ||       || |_____ | |_____   |   |_||_ |   |___ | |_____ |   |___   |   |  
-     |   |  |       ||   |___            |   ||  ||       ||       ||   | |   |___            |    ___||       ||_____  ||_____  |  |    __  ||    ___||_____  ||    ___|  |   |  
-     |   |  |   _   ||       |           |   |_| || ||_|| ||   _   ||   | |       |           |   |    |   _   | _____| | _____| |  |   |  | ||   |___  _____| ||   |___   |   |  
-     |___|  |__| |__||_______|           |_______||_|   |_||__| |__||___| |_______|           |___|    |__| |__||_______||_______|  |___|  |_||_______||_______||_______|  |___|  
-   
+    TWL - GOOGLE - PASS
+          *  * *    *  
+      * *  ** *  * *   
+    **               **
+                    *  
+                     **
+    * *       *        
+                       
+               *       
+     *     **          
+          *  *     *   
+                       
+                       
+    
 "@
     Write-Host $title
 }
@@ -114,7 +120,7 @@ if ($choice -match '^\d+$' -and $choice -le $usersTable.Count) {
     $selectedUser = $usersTable | Where-Object { $_.Number -eq $choice }
 
     # Generate a random password
-    $wordList = @("apple", "banana", "cherry", "date", "elderberry", "fig", "grape", "honeydew", "kiwi", "lemon")
+    $wordList = @('Frog', 'Hop', 'Leap', 'Pond', 'Log', 'Track', 'Pop', 'Otter', 'Grass', 'Rocket', 'Loop', 'Bop', 'Pull', 'Flight', 'World', 'Music', 'Honey', 'Otter', 'Slap', 'Glare', 'Bad', 'Good', 'Ramp', 'Glide', 'Bear', 'Arm', 'Apple', 'Pear', 'Peach', 'Age', 'Brand', 'Bend', 'Cloud', 'Truck', 'Car', 'Lake', 'Sea')
     $randomWords = (Get-Random -InputObject $wordList -Count 2 | ForEach-Object { $_.Substring(0,1).ToUpper() + $_.Substring(1) })
     $randomNumber = Get-Random -Minimum 1000 -Maximum 9999
     $randomPassword = ($randomWords -join "") + "@" + $randomNumber
