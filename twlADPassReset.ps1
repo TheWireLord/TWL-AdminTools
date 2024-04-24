@@ -2,6 +2,9 @@
 # It generates a random password, resets the selected user's password, unlocks the account, and copies the new password to the clipboard. 
 # It repeats until the user chooses to stop.
 
+# Change the console title
+$host.UI.RawUI.WindowTitle = "TWL - AD - PASS"
+
 # Define the log directory and file path
 $logDir = "logs"
 $logFile = "$logDir/log-ADPassReset.txt"
@@ -15,24 +18,38 @@ if (!(Test-Path $logDir)) {
 Add-Content -Path $logFile -Value ("[AD]-STARTED: " + (Get-Date -Format "MM/dd/yyyy hh:mm:ss tt"))
 
 function Show-TitleScreen {
+
+    # Change the console background color
+    $host.UI.RawUI.BackgroundColor = "DarkBlue"
+
     $title = @"
-    TWL - AD - PASS
-          **    *  
-      * *    * *   
-    **           **
-          *     *  
-                 **
-    * *            
-           *       
-                   
-     *             
-               *   
-                   
-                   
-    
-   
+                            TWL - AD - PASS                         
+
+
+
+                       AAA               DDDDDDDDDDDDD              
+                      A:::A              D::::::::::::DDD           
+                     A:::::A             D:::::::::::::::DD         
+                    A:::::::A            DDD:::::DDDDD:::::D        
+                   A:::::::::A             D:::::D    D:::::D       
+                  A:::::A:::::A            D:::::D     D:::::D      
+                 A:::::A A:::::A           D:::::D     D:::::D      
+                A:::::A   A:::::A          D:::::D     D:::::D      
+               A:::::A     A:::::A         D:::::D     D:::::D      
+              A:::::AAAAAAAAA:::::A        D:::::D     D:::::D      
+             A:::::::::::::::::::::A       D:::::D     D:::::D      
+            A:::::AAAAAAAAAAAAA:::::A      D:::::D    D:::::D       
+           A:::::A             A:::::A   DDD:::::DDDDD:::::D        
+          A:::::A               A:::::A  D:::::::::::::::DD         
+         A:::::A                 A:::::A D::::::::::::DDD           
+        AAAAAAA                   AAAAAAADDDDDDDDDDDDD              
+
+
 "@
     Write-Host $title
+
+    # Change the console background color
+    $host.UI.RawUI.BackgroundColor = "Black"
 }
 
 # Show the title screen
@@ -42,16 +59,21 @@ Show-TitleScreen
 Import-module ActiveDirectory
 
 while ($true) {
+
     # Ask the user to enter the search criteria
     $searchCriteria = Read-Host "Enter the first name, last name, or username of the person you want to change the password for"
 
-    # Search for users in Active Directory based on the search criteria
-    $users = Get-ADUser -Filter "GivenName -like '*$searchCriteria*' -or Surname -like '*$searchCriteria*' -or SamAccountName -like '*$searchCriteria*'" -Properties LockedOut, LastLogonDate, SamAccountName, Name, EmailAddress, whenCreated
+    # Split the search criteria into first and last name
+    $searchParts = $searchCriteria.Split(' ', 2)
 
-    # Check if any users are found
-    if ($users.Count -eq 0) {
-        Write-Host "No users found that match the search criteria"
-        continue
+    # Add a log entry for the search criteria
+    Add-Content -Path $logFile -Value ("SEARCH: $searchCriteria At: " + (Get-Date -Format "MM/dd/yyyy hh:mm:ss tt"))
+
+    # Search for users in Active Directory based on the search criteria
+    if ($searchParts.Length -eq 2) {
+        $users = Get-ADUser -Filter "GivenName -like '*$($searchParts[0])*' -and Surname -like '*$($searchParts[1])*' -or SamAccountName -like '*$searchCriteria*'" -Properties LockedOut, LastLogonDate, SamAccountName, Name, EmailAddress, whenCreated
+    } else {
+        $users = Get-ADUser -Filter "GivenName -like '*$searchCriteria*' -or Surname -like '*$searchCriteria*' -or SamAccountName -like '*$searchCriteria*'" -Properties LockedOut, LastLogonDate, SamAccountName, Name, EmailAddress, whenCreated
     }
 
     # Display the found users with their information

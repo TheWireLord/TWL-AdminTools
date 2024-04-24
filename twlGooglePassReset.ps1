@@ -5,6 +5,9 @@
 # The script generates a random password, resets the user's password using GAM, and copies the new password to the clipboard.
 # It also logs the password reset action in a log file and allows the user to reset another password if desired.
 
+# Change the console title
+$host.UI.RawUI.WindowTitle = "TWL - GOOGLE - PASS"
+
 # Define the log directory and file path
 $logDir = "logs"
 $logFile = "$logDir/log-GmailPassReset.txt"
@@ -18,23 +21,39 @@ if (!(Test-Path $logDir)) {
 Add-Content -Path $logFile -Value ("[GMAIL]-STARTED: " + (Get-Date -Format "MM/dd/yyyy hh:mm:ss tt"))
 
 function Show-TitleScreen {
-    $title = @"
-    TWL - GOOGLE - PASS
-          *  * *    *  
-      * *  ** *  * *   
-    **               **
-                    *  
-                     **
-    * *       *        
-                       
-               *       
-     *     **          
-          *  *     *   
-                       
-                       
     
+    # Change the console background color
+    $host.UI.RawUI.BackgroundColor = "DarkRed"
+    
+    $title = @"
+            TWL - GOOGLE - PASS         
+
+
+
+                GGGGGGGGGGGGG           
+             GGG::::::::::::G           
+           GG:::::::::::::::G           
+          G:::::GGGGGGGG::::G           
+         G:::::G       GGGGGG           
+        G:::::G                         
+        G:::::G                         
+        G:::::G    GGGGGGGGGG           
+        G:::::G    G::::::::G           
+        G:::::G    GGGGG::::G           
+        G:::::G        G::::G           
+         G:::::G       G::::G           
+          G:::::GGGGGGGG::::G           
+           GG:::::::::::::::G           
+             GGG::::::GGG:::G           
+                GGGGGG   GGGG           
+
+
+
 "@
     Write-Host $title
+
+    # Change the console background color
+    $host.UI.RawUI.BackgroundColor = "Black"
 }
 
 # Show the title screen
@@ -63,8 +82,10 @@ function Get-UsersTable {
         $username = $user.'primaryEmail'.Split('@')[0] # Extract the username from the email
 
         $isSuspended = if ($detailedInfo) {
+
             # Get the user info
             $userInfo = & gam info user $user.'primaryEmail' | Out-String
+
             # Extract the isSuspended field
             if ($userInfo -match 'Suspended: (.*)') {
                 $Matches[1]
@@ -96,6 +117,9 @@ function Get-UsersTable {
 
 # Prompt the user to enter the first name, last name, or username
 $searchQuery = Read-Host "Enter the first name, last name, or username of the user to reset the password for"
+
+# Add a log entry for the search query
+Add-Content -Path $logFile -Value ("SEARCH: $searchQuery At: " + (Get-Date -Format "MM/dd/yyyy hh:mm:ss tt"))
 
 # Get the initial users table
 $usersTable = Get-UsersTable -searchQuery $searchQuery
