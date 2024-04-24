@@ -1,4 +1,3 @@
-# Short descrition of this program and what id does:
 # This script is used to reset the password for a Gmail user using GAM (Google Apps Manager) command-line tool.
 # It prompts the user to enter the first name, last name, or username of the user to reset the password for.
 # It then displays a table of matching users and allows the user to select a user to reset the password for.
@@ -20,15 +19,13 @@ if (!(Test-Path $logDir)) {
 # Add a log entry for the start of the script
 Add-Content -Path $logFile -Value ("[GMAIL]-STARTED: " + (Get-Date -Format "MM/dd/yyyy hh:mm:ss tt"))
 
+# Function to show the title screen
 function Show-TitleScreen {
-    
     # Change the console background color
     $host.UI.RawUI.BackgroundColor = "DarkRed"
     
     $title = @"
             TWL - GOOGLE - PASS         
-
-
 
                 GGGGGGGGGGGGG           
              GGG::::::::::::G           
@@ -47,8 +44,6 @@ function Show-TitleScreen {
              GGG::::::GGG:::G           
                 GGGGGG   GGGG           
 
-
-
 "@
     Write-Host $title
 
@@ -56,9 +51,7 @@ function Show-TitleScreen {
     $host.UI.RawUI.BackgroundColor = "Black"
 }
 
-# Show the title screen
-Show-TitleScreen
-
+# Function to get users table
 function Get-UsersTable {
     param(
         [Parameter(Mandatory=$true)]
@@ -74,7 +67,7 @@ function Get-UsersTable {
     $usersCsv = & gam print users query "$searchQuery" fields $fields | Out-String
     $users = $usersCsv | ConvertFrom-Csv
 
-    # Display the users in a table and assign each user to a number
+    # Display the users in a table and assign each user to a number 
     $index = 1
     $usersTable = @()
     $users | ForEach-Object {
@@ -115,6 +108,53 @@ function Get-UsersTable {
     $usersTable
 }
 
+# Function to reset password
+function Reset-Password {
+    param(
+        [Parameter(Mandatory=$true)]
+        [PSCustomObject]$selectedUser
+    )
+
+    # Generate a random password
+    $wordList = @('Frog', 'Hop', 'Leap', 'Pond', 'Log', 'Track', 'Pop', 'Otter', 'Grass', 'Rocket', 'Loop', 'Bop', 'Pull', 'Flight', 'World', 'Music', 'Honey', 'Otter', 'Slap', 'Glare', 'Bad', 'Good', 'Ramp', 'Glide', 'Bear', 'Arm', 'Apple', 'Pear', 'Peach', 'Age', 'Brand', 'Bend', 'Cloud', 'Truck', 'Car', 'Lake', 'Sea')
+    $randomWords = (Get-Random -InputObject $wordList -Count 2 | ForEach-Object { $_.Substring(0,1).ToUpper() + $_.Substring(1) })
+    $randomNumber = Get-Random -Minimum 1000 -Maximum 9999
+    $randomPassword = ($randomWords -join "") + "@" + $randomNumber
+
+    # Reset the user's password using GAM
+    & gam update user $selectedUser.Username password $randomPassword changepassword on
+
+    # Add a log entry for the password reset
+    Add-Content -Path $logFile -Value ("USER: $($selectedUser.Username) Reset At: " + (Get-Date -Format "MM/dd/yyyy hh:mm:ss tt"))
+
+    # Copy the password to the clipboard
+    $randomPassword | Set-Clipboard
+
+    # Change background color
+    $host.UI.RawUI.BackgroundColor = "DarkGreen"
+
+    # Output the new password
+    Write-Host "The password for user $($selectedUser.Username) has been reset and copied to the clipboard."
+    
+    # Change background color
+    $host.UI.RawUI.BackgroundColor = "Black"
+}
+
+# Function to restart the script
+function Restart-Script {
+    & $PSScriptRoot\twlGooglePassReset.ps1
+}
+
+# Function to close the script
+function Close-Script {
+    # Add a log entry for the end of the script
+    Add-Content -Path $logFile -Value ("END: " + (Get-Date -Format "MM/dd/yyyy hh:mm:ss tt"))
+    exit
+}
+
+# Show the title screen
+Show-TitleScreen
+
 # Prompt the user to enter the first name, last name, or username
 $searchQuery = Read-Host "Enter the first name, last name, or username of the user to reset the password for"
 
@@ -142,30 +182,16 @@ if ($choice -eq 'info') {
 if ($choice -match '^\d+$' -and $choice -le $usersTable.Count) {
     # Reset the password for the selected user
     $selectedUser = $usersTable | Where-Object { $_.Number -eq $choice }
+    Reset-Password -selectedUser $selectedUser
 
-    # Generate a random password
-    $wordList = @('Frog', 'Hop', 'Leap', 'Pond', 'Log', 'Track', 'Pop', 'Otter', 'Grass', 'Rocket', 'Loop', 'Bop', 'Pull', 'Flight', 'World', 'Music', 'Honey', 'Otter', 'Slap', 'Glare', 'Bad', 'Good', 'Ramp', 'Glide', 'Bear', 'Arm', 'Apple', 'Pear', 'Peach', 'Age', 'Brand', 'Bend', 'Cloud', 'Truck', 'Car', 'Lake', 'Sea')
-    $randomWords = (Get-Random -InputObject $wordList -Count 2 | ForEach-Object { $_.Substring(0,1).ToUpper() + $_.Substring(1) })
-    $randomNumber = Get-Random -Minimum 1000 -Maximum 9999
-    $randomPassword = ($randomWords -join "") + "@" + $randomNumber
-
-    # Reset the user's password using GAM
-    & gam update user $selectedUser.Username password $randomPassword changepassword on
-
-    # Add a log entry for the password reset
-    Add-Content -Path $logFile -Value ("USER: $($selectedUser.Username) Reset At: " + (Get-Date -Format "MM/dd/yyyy hh:mm:ss tt"))
-
-    # Copy the password to the clipboard
-    $randomPassword | Set-Clipboard
-
-    # Output the new password
-    Write-Host "The password for user $($selectedUser.Username) has been reset and copied to the clipboard."
-    
     # Ask the user if they want to reset another password
     $resetAnother = Read-Host "Do you want to reset another password? (Y/N)"
     if ($resetAnother -eq 'Y') {
         # Restart the script
-        & $PSScriptRoot\twlGooglePassReset.ps1
+        Restart-Script
+    } else {
+        # Close the script
+        Close-Script
     }
 
 } else {
@@ -175,13 +201,9 @@ if ($choice -match '^\d+$' -and $choice -le $usersTable.Count) {
     $runAgain = Read-Host "Do you want to run the script again? (Y/N)"
     if ($runAgain -eq 'Y') {
         # Restart the script
-        & $PSScriptRoot\twlGooglePassReset.ps1
-    }
-    else {
-        #Close the script
-        exit
+        Restart-Script
+    } else {
+        # Close the script
+        Close-Script
     }
 }
-
-# Add a log entry for the end of the script
-Add-Content -Path $logFile -Value ("END: " + (Get-Date -Format "MM/dd/yyyy hh:mm:ss tt"))
