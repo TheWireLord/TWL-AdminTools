@@ -109,16 +109,18 @@ function Get-UserNumber($usersCount) {
         # Prompt the user to enter a number
         $userNumber = Read-Host "Enter the number of the user you want to change the password for"
 
+        # Try to parse the user input as an integer
+        $parsed = [int]::TryParse($userNumber, [ref]$null)
+
         # If the entered number is a valid integer and within the range of the number of users, return the number
         # Otherwise, display an error message
-        if ([int]::TryParse($userNumber, [ref]$null) -and $userNumber -ge 1 -and $userNumber -le $usersCount) {
+        if ($parsed -and [int]$userNumber -ge 1 -and [int]$userNumber -le $usersCount) {
             return $userNumber
         }
 
         Write-Host "Invalid user number"
     }
 }
-
 # This function generates a random password
 function Generate-Password() {
     # Define a list of words to use in the password
@@ -163,7 +165,7 @@ Import-module ActiveDirectory
 while ($true) {
     $searchCriteria = Read-Host "Enter the first name, last name, or username of the person you want to change the password for"
     Add-Content -Path $logFile -Value ("SEARCH: $searchCriteria At: " + (Get-Date -Format "MM/dd/yyyy hh:mm:ss tt"))
-    $users = Get-Users $searchCriteria
+    $users = @(Get-Users $searchCriteria)  # Force $users to be an array
     Display-Users $users
     $userNumber = Get-UserNumber $users.Count
     $selectedUser = $users[$userNumber - 1]

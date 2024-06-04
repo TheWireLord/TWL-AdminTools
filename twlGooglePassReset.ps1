@@ -162,7 +162,7 @@ $searchQuery = Read-Host "Enter the first name, last name, or username of the us
 Add-Content -Path $logFile -Value ("SEARCH: $searchQuery At: " + (Get-Date -Format "MM/dd/yyyy hh:mm:ss tt"))
 
 # Get the initial users table
-$usersTable = Get-UsersTable -searchQuery $searchQuery
+$usersTable = @(Get-UsersTable -searchQuery $searchQuery)
 
 # Display the users table
 $usersTable | Format-Table -AutoSize
@@ -172,7 +172,7 @@ $choice = Read-Host "Enter the number of the user to reset the password for, or 
 
 if ($choice -eq 'info') {
     # Get more info about all users
-    $usersTable = Get-UsersTable -searchQuery $searchQuery -detailedInfo $true
+    $usersTable = @(Get-UsersTable -searchQuery $searchQuery -detailedInfo $true)
     $usersTable | Format-Table -AutoSize
 
     # Prompt the user to select the number of the user to reset the password for
