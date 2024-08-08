@@ -4,3 +4,4 @@
 /logs
 logs/log-GmailPassReset.txt
 logs/log-ADPassReset.txt
+/\#POWERSHELL/logs
