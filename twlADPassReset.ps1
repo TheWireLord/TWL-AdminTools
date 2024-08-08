@@ -137,6 +137,9 @@ function Reset-Password($selectedUser, $password) {
 
     # Unlock the account of the selected user
     $selectedUser | Unlock-ADAccount
+
+    # Force the password to expire so the user will be prompted to change it at next login
+    $selectedUser | Set-ADUser -ChangePasswordAtLogon $true
 }
 
 # This function asks the user if they want to continue changing passwords
